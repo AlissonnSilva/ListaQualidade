@@ -1,0 +1,9 @@
+{
+  "name": "Bolo de cenoura Cypress",
+  "description": "Bolo com cobertura de chocolate.",
+  "category": "Bolos",
+  "price": 45.9,
+  "stock": 20,
+  "minimum_stock": 5,
+  "active": true
+}

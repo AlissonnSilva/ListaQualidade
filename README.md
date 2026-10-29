@@ -1,42 +1,50 @@
 # Doce Gestão
 
-Projeto didático de uma confeitaria em Laravel 13, com Blade, Docker Compose e MySQL.
+Aplicação didática de uma confeitaria em Laravel 13, com Blade, Docker Compose e MySQL.
 
-## Executando com Docker
+## Executar com Docker
 
-Requisitos: Docker Desktop/OrbStack em execução.
+Requisitos: Docker Desktop em execução e `docker-compose` disponível no terminal.
 
 ```bash
 ./docker/install.sh
 ./docker/start.sh
 ```
 
-Acesse http://localhost:8000. Para acompanhar os logs, use `docker compose logs -f app`.
+Acesse http://localhost:8000. O MySQL usa o volume persistente `mysql_data`.
 
-O script de instalação cria a chave da aplicação, sobe as migrations e insere dados de exemplo. O banco MySQL fica persistido no volume `mysql_data`.
+## Testes PHPUnit
 
-## Módulos para explorar
-
-- **Produtos e estoque:** categoria em select, preço, estoque mínimo e alerta visual de estoque baixo.
-- **Clientes:** dados de contato e endereço.
-- **Pedidos/vendas:** selects de cliente e produto, status, validação de estoque e baixa automática na criação.
-- **Fretes/entregas:** pedido, endereço, taxa, data prevista, rastreio e status.
-
-Cada módulo possui listagem paginada, formulário de criação, edição e exclusão. As regras ficam nos controllers e as tabelas são definidas por migrations.
-
-## Desenvolvimento local sem Docker
-
-Com PHP e Composer instalados:
+Com os serviços Docker em execução:
 
 ```bash
-cp .env.example .env
-php artisan key:generate
-php artisan migrate:fresh --seed
-php artisan serve
+docker-compose exec app php artisan test
 ```
 
-Para executar os testes:
+O PHPUnit usa SQLite em memória; a imagem PHP inclui `pdo_sqlite` para isso.
+
+## Testes Cypress
+
+Instale as dependências JavaScript e mantenha a aplicação Docker em execução:
 
 ```bash
-php artisan test
+npm install
+npm run cypress:open
 ```
+
+Para executar sem a interface do Cypress:
+
+```bash
+npm run cypress:run
+```
+
+A configuração usa `http://localhost:8000`. Antes da primeira spec, a task Cypress executa `docker-compose exec app php artisan migrate:fresh --seed --force`. Esse comando apaga e recria as tabelas do banco MySQL configurado pela aplicação. Execute a suíte apenas quando esse banco contiver dados descartáveis.
+
+## Módulos
+
+- **Produtos e estoque:** categorias, preço, quantidade, estoque mínimo e alerta visual de estoque baixo.
+- **Clientes:** contato e endereço.
+- **Pedidos:** preço registrado no pedido, validação de estoque e baixa protegida por transação.
+- **Fretes:** pedido relacionado, endereço, taxa, data prevista, rastreio e status.
+
+Os cadastros têm listagem paginada, criação, edição e exclusão. As regras ficam nos controllers, e o esquema do banco fica nas migrations.

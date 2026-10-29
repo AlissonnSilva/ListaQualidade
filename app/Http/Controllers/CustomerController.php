@@ -22,5 +22,14 @@ class CustomerController extends Controller
         $cliente->update($request->validate(['name' => ['required', 'string', 'max:120'], 'email' => ['nullable', 'email'], 'phone' => ['nullable', 'string', 'max:30'], 'address' => ['nullable', 'string', 'max:255'], 'city' => ['nullable', 'string', 'max:80']]));
         return to_route('clientes.index')->with('success', 'Cliente atualizado com sucesso.');
     }
-    public function destroy(Customer $cliente): RedirectResponse { $cliente->delete(); return to_route('clientes.index')->with('success', 'Cliente removido.'); }
+    public function destroy(Customer $cliente): RedirectResponse
+    {
+        if ($cliente->orders()->exists()) {
+            return back()->withErrors(['customer' => 'Não é possível remover um cliente com pedidos cadastrados.']);
+        }
+
+        $cliente->delete();
+
+        return to_route('clientes.index')->with('success', 'Cliente removido.');
+    }
 }

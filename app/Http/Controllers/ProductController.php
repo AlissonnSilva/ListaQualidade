@@ -32,5 +32,14 @@ class ProductController extends Controller
         ]) + ['active' => $request->boolean('active')]);
         return to_route('produtos.index')->with('success', 'Produto atualizado com sucesso.');
     }
-    public function destroy(Product $produto): RedirectResponse { $produto->delete(); return to_route('produtos.index')->with('success', 'Produto removido.'); }
+    public function destroy(Product $produto): RedirectResponse
+    {
+        if ($produto->orders()->exists()) {
+            return back()->withErrors(['product' => 'Não é possível remover um produto vinculado a pedidos.']);
+        }
+
+        $produto->delete();
+
+        return to_route('produtos.index')->with('success', 'Produto removido.');
+    }
 }
